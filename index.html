@@ -82,7 +82,7 @@
 
 <div id="overlay">
   <p class="title">Horizon artificiel</p>
-  <p>Tiens le téléphone à l'horizontale, comme un horizon artificiel d'avion. Passe en plein écran puis laisse-le en fond d'écran.</p>
+  <p>Pose le téléphone à plat, écran vers le haut, comme un horizon artificiel d'avion. Passe en plein écran puis laisse-le en fond d'écran.</p>
   <button id="startBtn">Activer et passer en plein écran</button>
   <p id="errMsg" style="color:#ff6b6b;"></p>
 </div>
@@ -122,31 +122,33 @@
 
   function handleOrientation(e) {
     if (e.beta === null || e.gamma === null) return;
+    // Telephone pose a plat, ecran vers le haut : position neutre = beta=0, gamma=0 (aucun offset).
+    // On adapte juste les axes a la rotation d'ecran en cours, au cas ou elle change.
     var angle = getScreenAngle();
     var roll, pitch;
-    if (angle === -90 || angle === 270) {
-      // Paysage, telephone tenu a l'horizontale dans l'autre sens
-      roll = e.beta;
-      pitch = -e.gamma;
-    } else {
-      // Par defaut (angle 0/90) : telephone tenu a l'horizontale devant soi, ecran verrouille en paysage
+    if (angle === 90) {
       roll = -e.beta;
       pitch = e.gamma;
+    } else if (angle === -90 || angle === 270) {
+      roll = e.beta;
+      pitch = -e.gamma;
+    } else if (angle === 180) {
+      roll = -e.gamma;
+      pitch = -e.beta;
+    } else {
+      // Portrait naturel (cas par defaut, telephone pose normalement sur la table)
+      roll = e.gamma;
+      pitch = e.beta;
     }
     targetRoll = roll;
     targetPitch = pitch;
     sensorsActive = true;
   }
 
-  function goFullscreenLandscape() {
+  function goFullscreen() {
     var el = document.documentElement;
     var request = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-    var fsPromise = request ? request.call(el) : Promise.resolve();
-    Promise.resolve(fsPromise).catch(function(){}).then(function(){
-      if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(function(){});
-      }
-    });
+    if (request) request.call(el).catch(function(){});
   }
 
   function animate() {
@@ -164,7 +166,7 @@
   }
 
   function startSensors() {
-    goFullscreenLandscape();
+    goFullscreen();
     if (typeof DeviceOrientationEvent !== 'undefined' &&
         typeof DeviceOrientationEvent.requestPermission === 'function') {
       // iOS 13+: necessite un geste utilisateur

@@ -1,12 +1,12 @@
 {
   "name": "Horizon artificiel",
   "short_name": "Horizon",
-  "description": "Horizon artificiel plein écran qui réagit à l'inclinaison du téléphone, tenu à l'horizontale.",
+  "description": "Horizon artificiel plein écran qui réagit à l'inclinaison du téléphone posé à plat, écran vers le haut.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "fullscreen",
   "display_override": ["fullscreen", "standalone"],
-  "orientation": "landscape",
+  "orientation": "any",
   "background_color": "#050507",
   "theme_color": "#050507",
   "icons": [
