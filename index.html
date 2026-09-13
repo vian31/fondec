@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Horizon artificiel</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#050507">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Horizon">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+
 <style>
   html, body {
     margin: 0; padding: 0; width: 100%; height: 100%;
@@ -73,8 +82,8 @@
 
 <div id="overlay">
   <p class="title">Horizon artificiel</p>
-  <p>Ce fond réagit à l'inclinaison du téléphone (roulis et tangage), comme un horizon artificiel d'avion.</p>
-  <button id="startBtn">Activer les capteurs</button>
+  <p>Tiens le téléphone à l'horizontale, comme un horizon artificiel d'avion. Passe en plein écran puis laisse-le en fond d'écran.</p>
+  <button id="startBtn">Activer et passer en plein écran</button>
   <p id="errMsg" style="color:#ff6b6b;"></p>
 </div>
 
@@ -115,20 +124,29 @@
     if (e.beta === null || e.gamma === null) return;
     var angle = getScreenAngle();
     var roll, pitch;
-    if (angle === 90) {
-      roll = -e.beta;
-      pitch = e.gamma;
-    } else if (angle === -90 || angle === 270) {
+    if (angle === -90 || angle === 270) {
+      // Paysage, telephone tenu a l'horizontale dans l'autre sens
       roll = e.beta;
       pitch = -e.gamma;
     } else {
-      // Portrait : telephone tenu vertical devant soi -> beta proche de 90 = vol en palier
-      roll = e.gamma;
-      pitch = e.beta - 90;
+      // Par defaut (angle 0/90) : telephone tenu a l'horizontale devant soi, ecran verrouille en paysage
+      roll = -e.beta;
+      pitch = e.gamma;
     }
     targetRoll = roll;
     targetPitch = pitch;
     sensorsActive = true;
+  }
+
+  function goFullscreenLandscape() {
+    var el = document.documentElement;
+    var request = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    var fsPromise = request ? request.call(el) : Promise.resolve();
+    Promise.resolve(fsPromise).catch(function(){}).then(function(){
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(function(){});
+      }
+    });
   }
 
   function animate() {
@@ -146,6 +164,7 @@
   }
 
   function startSensors() {
+    goFullscreenLandscape();
     if (typeof DeviceOrientationEvent !== 'undefined' &&
         typeof DeviceOrientationEvent.requestPermission === 'function') {
       // iOS 13+: necessite un geste utilisateur
@@ -168,6 +187,12 @@
   }
 
   startBtn.addEventListener('click', startSensors);
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').catch(function(){});
+    });
+  }
 
   // Demarrage automatique si aucune permission explicite n'est requise (Android)
   if (!(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function')) {
