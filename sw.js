@@ -1,5 +1,5 @@
 // Service worker : met l'app en cache pour fonctionner hors-ligne autour de la table.
-var CACHE_NAME = 'skullking-v1';
+var CACHE_NAME = 'skullking-v2';
 var ASSETS = [
   './',
   './index.html',

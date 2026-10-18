@@ -35,9 +35,9 @@ input{font:inherit}
 #app{max-width:560px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;
   background:radial-gradient(120% 60% at 50% 0,#1d4466 0,var(--sea) 30%,var(--ink) 65%,var(--deep));
   padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)}
-header{display:flex;align-items:center;gap:8px;padding:10px 12px 6px}
-.logo{flex:1;font-family:var(--arcade);font-size:22px;color:var(--gold);text-shadow:0 2px 0 var(--red-d),0 4px 10px #000;letter-spacing:1px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-top:3px}
-.ico{width:42px;height:42px;border-radius:12px;background:#ffffff14;display:grid;place-items:center;font-size:19px;flex:none;box-shadow:0 3px 0 #0005}
+header{display:flex;align-items:center;gap:6px;padding:10px 12px 6px}
+.logo{flex:1;min-width:0;font-family:var(--arcade);font-size:21px;color:var(--gold);text-shadow:0 2px 0 var(--red-d),0 4px 10px #000;letter-spacing:.5px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-top:3px}
+.ico{width:40px;height:40px;border-radius:12px;background:#ffffff14;display:grid;place-items:center;font-size:19px;flex:none;box-shadow:0 3px 0 #0005}
 .ico:active{transform:translateY(2px);box-shadow:0 1px 0 #0005}
 .ico:disabled{opacity:.25}
 .ico.ghost{visibility:hidden}
@@ -193,6 +193,14 @@ tr.sumrow td{font-family:var(--arcade);font-size:16px;font-weight:400;color:var(
 .tog::after{content:'';position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 2px 4px #0006}
 .sw.on .tog{background:var(--teal)}
 .sw.on .tog::after{left:27px}
+.rule h3{font-family:var(--arcade);font-weight:400;font-size:19px;color:var(--gold);letter-spacing:.5px;margin:6px 0 4px}
+.rule p,.rule li{font-size:14px;line-height:1.5;font-weight:700;color:#d6e2ec}
+.rule b{color:var(--txt)}
+.rule ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.rule li{background:#ffffff0b;border-radius:12px;padding:8px 10px;display:flex;gap:10px;align-items:flex-start}
+.rule li>span:first-child{font-size:22px;line-height:1.1;flex:none;width:28px;text-align:center}
+.rule .order{font-family:var(--arcade);font-size:16px;text-align:center;color:var(--txt);background:#ffc83d18;border-radius:12px;padding:10px 6px 7px;line-height:1.5}
+.rule .on-opt{color:var(--teal);font-size:12px;font-family:Nunito,sans-serif;font-weight:900;letter-spacing:1px}
 .rules{font-size:13px;color:var(--mut);line-height:1.5;background:#ffffff08;border-radius:14px;padding:10px 12px;font-weight:700}
 .rules b{color:var(--txt)}
 
@@ -318,6 +326,8 @@ function header(title, left, right) {
   return '<header>' + (left || '<span class="ico ghost"></span>') + '<div class="logo">' + title + '</div>' + (right || '<span class="ico ghost"></span>') + '</header>';
 }
 function undoBtn() { return '<button class="ico" data-act="undo" aria-label="Annuler"' + (undoStack.length ? '' : ' disabled') + '>↶</button>'; }
+function rulesBtn() { return '<button class="ico" data-act="rules" aria-label="Règle du jeu">📜</button>'; }
+function gameLeft() { return undoBtn() + rulesBtn(); }
 function gameRight() { return '<button class="ico" data-act="board" aria-label="Scores">🏆</button><button class="ico" data-act="settings" aria-label="Réglages">⚙</button>'; }
 function dots(cur) {
   var h = '<div class="dots">';
@@ -327,7 +337,7 @@ function dots(cur) {
 
 function vSetup() {
   var can = S.players.length >= 2;
-  return header('☠ SKULL KING', '<span class="ico ghost"></span>', '<button class="ico" data-act="settings" aria-label="Réglages">⚙</button>') +
+  return header('☠ SKULL KING', rulesBtn(), '<button class="ico" data-act="settings" aria-label="Réglages">⚙</button>') +
     '<main><div class="ttl"><small>QUI EMBARQUE ?</small>Équipage</div>' +
     '<div id="plist" style="display:flex;flex-direction:column;gap:8px">' + setupList() + '</div>' +
     '<form class="add" data-form="add"' + (S.players.length >= 8 ? ' hidden' : '') + '><input id="pname" enterkeyhint="done" autocomplete="off" maxlength="14" placeholder="Nom du pirate…"><button class="btn" type="submit" aria-label="Ajouter">+</button></form>' +
@@ -362,7 +372,7 @@ function vBid() {
   var sel = ui.sel ? player(ui.sel) : null;
   var allIn = ps.every(function (p) { return r.bids[p.id] != null; });
   var sum = ps.reduce(function (t, p) { return t + (r.bids[p.id] || 0); }, 0);
-  var h = header('MANCHE ' + n, undoBtn(), gameRight()) + '<main>' + dots(i) +
+  var h = header('MANCHE ' + n, gameLeft(), gameRight()) + '<main>' + dots(i) +
     '<div class="ttl"><small>' + n + ' CARTE' + (n > 1 ? 'S' : '') + ' · ANNONCES</small></div>';
   if (sel) {
     h += '<div class="who">' + av(sel, 'lg') + '<span class="nm">' + esc(sel.name) + '</span></div><div class="keys">';
@@ -395,7 +405,7 @@ function vPlay() {
   var editing = !!S.edit;
   var allSet = ps.every(function (p) { return r.tricks[p.id] != null; });
   var tsum = ps.reduce(function (t, p) { return t + (r.tricks[p.id] || 0); }, 0);
-  var h = header(editing ? 'CORRECTION · M' + n : 'MANCHE ' + n, undoBtn(), gameRight()) + '<main>' + (editing ? '' : dots(i)) +
+  var h = header(editing ? 'CORRIGER M' + n : 'MANCHE ' + n, gameLeft(), gameRight()) + '<main>' + (editing ? '' : dots(i)) +
     '<div class="ttl"><small>' + n + ' CARTE' + (n > 1 ? 'S' : '') + ' · QUI A RÉUSSI ?</small></div>';
   ps.forEach(function (p) {
     var bid = r.bids[p.id], t = r.tricks[p.id];
@@ -459,7 +469,7 @@ function board(upto) {
 
 function vScores() {
   var d = S.done;
-  return header('APRÈS MANCHE ' + d, undoBtn(), gameRight()) + '<main>' + dots(-1) + '<div class="ttl"><small>LE CLASSEMENT</small></div>' + board(d) +
+  return header('MANCHE ' + d + ' ✔', gameLeft(), gameRight()) + '<main>' + dots(-1) + '<div class="ttl"><small>LE CLASSEMENT</small></div>' + board(d) +
     '</main><footer><button class="btn red" data-act="next">▶ Manche ' + (d + 1) + ' · ' + (d + 1) + ' carte' + (d ? 's' : '') + '</button></footer>';
 }
 
@@ -468,7 +478,7 @@ function vEnd() {
   var win = rk.filter(function (x) { return x.rank === 1; });
   var order = [rk[1], rk[0], rk[2]].filter(Boolean);
   var hts = { 1: 175, 2: 140, 3: 115 };
-  var h = header('☠ SKULL KING', undoBtn(), gameRight()) + '<main><div class="ttl" style="margin-top:6px"><small>' + (win.length > 1 ? 'LES ROIS DES PIRATES SONT…' : 'LE ROI DES PIRATES EST…') + '</small></div>' +
+  var h = header('☠ SKULL KING', gameLeft(), gameRight()) + '<main><div class="ttl" style="margin-top:6px"><small>' + (win.length > 1 ? 'LES ROIS DES PIRATES SONT…' : 'LE ROI DES PIRATES EST…') + '</small></div>' +
     '<div class="crown">👑</div><div class="winner pop">' + win.map(function (x) { return esc(x.p.name); }).join(' & ') + ' !</div><div class="pod">' +
     order.map(function (x) {
       return '<div style="--c:' + x.p.color + ';height:' + hts[Math.min(x.rank, 3)] + 'px"><span class="e">' + x.p.emoji + '</span><br>' + esc(x.p.name) + '<br><span class="p">' + num(x.tot) + '</span></div>';
@@ -506,6 +516,39 @@ function mPick(pid) {
 function mBoard() {
   return '<div class="sh"><div class="logo">🏆 SCORES</div><button class="ico" data-act="close">✕</button></div>' + board(S.done);
 }
+function mRules() {
+  var li = function (e, t) { return '<li><span>' + e + '</span><span>' + t + '</span></li>'; };
+  var scoring = S.opts.rascal
+    ? '<ul>' + li('🎯', '<b>Pari exact</b> : 10 pts × nombre de cartes de la manche, + bonus.') +
+      li('🌗', '<b>Écart de 1 pli</b> : la moitié (bonus compris).') + li('💨', '<b>Écart de 2 plis ou plus</b> : 0.') +
+      li('💣', '<b>Boulet de canon</b> (choisi après les annonces) : 15 pts × cartes + bonus si exact, sinon 0.') +
+      li('0️⃣', 'Un pari de 0 se compte comme les autres.') + '</ul>'
+    : '<ul>' + li('✔', '<b>Pari réussi</b> (1 ou plus) : 20 pts par pli remporté, + bonus.') +
+      li('✘', '<b>Pari raté</b> : −10 pts par pli d\'écart, pas de bonus.') +
+      li('0️⃣', '<b>Pari de 0 réussi</b> : 10 pts × nombre de cartes. <b>Raté</b> : −10 pts × nombre de cartes.') + '</ul>';
+  var bonus = '<ul>' + BONUS.map(function (x) { return li(x.e, '<b>' + x.l + '</b> ' + x.s); }).join('') + '</ul>' +
+    '<p style="margin-top:6px">' + (S.opts.rascal ? 'Comptés en entier si pari exact, à moitié si écart de 1.' : 'Gagnés seulement si le pari est réussi.') + '</p>';
+  return '<div class="sh"><div class="logo">📜 LA RÈGLE</div><button class="ico" data-act="close">✕</button></div><div class="rule">' +
+    '<h3>Le but</h3><p>10 manches. À la manche <b>N</b>, chacun reçoit <b>N cartes</b>. Il faut annoncer <b>exactement</b> le nombre de plis qu\'on va remporter.</p>' +
+    '<h3>Une manche</h3><ul>' +
+      li('✊', '<b>Annonce</b> : tous en même temps, poing fermé, « Yo-ho-ho ! » puis on montre le nombre de doigts.') +
+      li('🃏', '<b>Jeu</b> : on doit fournir la couleur demandée si possible. Les cartes spéciales se jouent toujours, même si on a la couleur.') +
+      li('🏴‍☠️', 'Le <b>noir</b> (Jolly Roger) est l\'atout : il bat les autres couleurs.') +
+      li('🔁', 'Le gagnant du pli entame le suivant. Le donneur tourne à chaque manche.') + '</ul>' +
+    '<h3>Qui gagne le pli ?</h3><div class="order">👑 Skull King › 🗡️ Pirates › 🧜 Sirènes › 🏴‍☠️ Noir › couleur demandée › 🏳️ Fuite</div><ul style="margin-top:6px">' +
+      li('🧜', 'Exception : une <b>sirène capture le Skull King</b> (s\'ils sont tous les trois dans le pli, la sirène gagne).') +
+      li('🥇', 'Entre cartes spéciales identiques (2 pirates, 2 sirènes…), <b>la première jouée</b> gagne.') +
+      li('🔢', 'Sinon : le plus fort de la couleur demandée, ou le plus fort atout noir.') + '</ul>' +
+    '<h3>Cartes spéciales</h3><ul>' +
+      li('🏳️', '<b>Fuite</b> : perd toujours. Si toutes les cartes sont des fuites, la première gagne.') +
+      li('🐯', '<b>Tigresse</b> : au moment de la jouer, on choisit pirate ou fuite.') +
+      li('🦑', '<b>Kraken</b> : le pli est détruit, personne ne le gagne. Celui qui l\'aurait gagné entame.') +
+      li('🐳', '<b>Baleine blanche</b> : les cartes spéciales n\'ont plus d\'effet, la plus forte valeur gagne, toutes couleurs confondues.') +
+      li('💰', '<b>Butin</b> : se joue comme une fuite ; son joueur s\'allie à celui qui remporte le pli.') + '</ul>' +
+    '<h3>Les points <span class="on-opt">' + (S.opts.rascal ? '· COMPTAGE RASCAL' : '· COMPTAGE CLASSIQUE') + '</span></h3>' + scoring +
+    (S.opts.bonus ? '<h3>Les bonus</h3>' + bonus : '<p style="margin-top:8px;color:var(--mut)">Points bonus désactivés (⚙ pour les activer).</p>') +
+    '</div><button class="btn sm" data-act="close">Compris !</button>';
+}
 function mSettings() {
   var inGame = S.view !== 'setup';
   return '<div class="sh"><div class="logo">⚙ RÉGLAGES</div><button class="ico" data-act="close">✕</button></div>' +
@@ -532,8 +575,8 @@ function render() {
   if (nm) nm.scrollTop = keep;
   var m = ui.modal, mh = '';
   if (m) {
-    var body = m.type === 'bonus' ? mBonus(m.id) : m.type === 'pick' ? mPick(m.id) : m.type === 'board' ? mBoard() : mSettings();
-    mh = '<div class="veil" data-act="veil"><div class="sheet' + (m.type === 'board' ? ' full' : '') + '">' + body + '</div></div>';
+    var body = m.type === 'bonus' ? mBonus(m.id) : m.type === 'pick' ? mPick(m.id) : m.type === 'board' ? mBoard() : m.type === 'rules' ? mRules() : mSettings();
+    mh = '<div class="veil" data-act="veil"><div class="sheet' + (m.type === 'board' || m.type === 'rules' ? ' full' : '') + '">' + body + '</div></div>';
   }
   var md = document.getElementById('modal');
   var sheet = md.querySelector('.sheet'), st = sheet ? sheet.scrollTop : 0;
@@ -666,6 +709,7 @@ var actions = {
   undo: undo,
   settings: function () { ui.modal = { type: 'settings' }; render(); },
   board: function () { ui.modal = { type: 'board' }; render(); },
+  rules: function () { ui.modal = { type: 'rules' }; render(); },
   close: function () { ui.modal = null; render(); },
   veil: function (d, ev) { if (ev.target.classList.contains('veil')) { ui.modal = null; render(); } },
   opt: function (d) { commit(function () { S.opts[d.k] = !S.opts[d.k]; }); },
