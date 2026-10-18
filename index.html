@@ -869,46 +869,45 @@ render();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
 
 /* Petite animation de démarrage : logo, titre, quelques pièces qui flottent, puis disparaît.
-   On attend que la page soit vraiment prête (polices + chargement complet, avec un plafond
-   de sécurité) avant de la lancer : sinon elle se joue en partie cachée derrière l'écran de
-   lancement natif de l'appli installée, et semble coupée quand celui-ci se retire. */
+   Elle démarre tout de suite (jamais de temps mort avant de voir quoi que ce soit) et reste
+   affichée au moins le temps de se jouer en entier, même si la page met plus longtemps à
+   charger — c'est seulement la disparition qui attend que tout soit prêt, dans la limite
+   d'un plafond de sécurité pour ne jamais rester bloquée dessus. */
 (function boot() {
   var el = document.getElementById('boot');
   if (!el) return;
   var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function go() {
-    if (!el.parentNode) return;
-    if (!reduced) {
-      var fx = el.querySelector('.bootfx'), items = ['🪙', '🪙', '💀', '⚓', '🏴‍☠️'];
-      for (var i = 0; i < 7; i++) {
-        var s = document.createElement('span');
-        s.textContent = items[i % items.length];
-        s.style.left = (8 + Math.random() * 84) + '%';
-        s.style.animationDelay = (Math.random() * .7) + 's';
-        fx.appendChild(s);
-      }
+  if (!reduced) {
+    var fx = el.querySelector('.bootfx'), items = ['🪙', '🪙', '💀', '⚓', '🏴‍☠️'];
+    for (var i = 0; i < 7; i++) {
+      var s = document.createElement('span');
+      s.textContent = items[i % items.length];
+      s.style.left = (8 + Math.random() * 84) + '%';
+      s.style.animationDelay = (Math.random() * .7) + 's';
+      fx.appendChild(s);
     }
-    requestAnimationFrame(function () { el.classList.add('go'); });
-    var done = false;
-    function dismiss() {
-      if (done) return;
-      done = true;
-      el.classList.add('out');
-      el.addEventListener('transitionend', function () { el.remove(); }, { once: true });
-      setTimeout(function () { if (el.parentNode) el.remove(); }, 500);
-    }
-    el.addEventListener('click', dismiss);
-    setTimeout(dismiss, reduced ? 450 : 1650);
   }
+  requestAnimationFrame(function () { el.classList.add('go'); });
 
+  var done = false;
+  function dismiss() {
+    if (done || !el.parentNode) return;
+    done = true;
+    el.classList.add('out');
+    el.addEventListener('transitionend', function () { el.remove(); }, { once: true });
+    setTimeout(function () { if (el.parentNode) el.remove(); }, 500);
+  }
+  el.addEventListener('click', dismiss);
+
+  var minDisplay = new Promise(function (res) { setTimeout(res, reduced ? 450 : 1450); });
   var pageReady = new Promise(function (res) {
     if (document.readyState === 'complete') res();
     else window.addEventListener('load', res, { once: true });
   });
   var fontsReady = (document.fonts && document.fonts.ready) || Promise.resolve();
-  var safetyNet = new Promise(function (res) { setTimeout(res, 1200); });
-  Promise.race([Promise.all([pageReady, fontsReady]), safetyNet]).then(go);
+  var safetyNet = new Promise(function (res) { setTimeout(res, 3000); });
+  Promise.race([Promise.all([minDisplay, pageReady, fontsReady]), safetyNet]).then(dismiss);
 })();
 </script>
 </body>
