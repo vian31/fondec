@@ -115,24 +115,22 @@ footer{padding:0.625rem 0.875rem calc(0.875rem + env(safe-area-inset-bottom));di
 .row{background:#ffffff0e;border-radius:1rem;padding:0.5625rem 0.625rem;border-left:0.375rem solid var(--c);display:flex;flex-direction:column;gap:0.5rem}
 .rh{display:flex;align-items:center;gap:0.625rem}
 .rh .nm{flex:1;font-weight:900;font-size:1.0625rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bid{display:inline-flex;align-items:center;gap:0.25rem;font-size:0.875rem;color:var(--mut);font-weight:900;background:#ffffff10;border-radius:0.625rem;padding:0.3125rem 0.5625rem}
-.bid b{color:var(--txt);font-family:var(--arcade);font-size:1.0625rem;font-weight:400;padding-top:0.125rem}
 .pts{font-family:var(--arcade);font-size:1.5rem;min-width:3.5rem;text-align:right;padding-top:0.1875rem}
 .pos{color:var(--teal)} .neg{color:var(--red)} .nil{color:var(--mut)}
-.ra{display:flex;gap:0.5rem}
-.ok,.ko,.st{font-family:var(--arcade);font-size:1.125rem;border-radius:0.75rem;padding:0.6875rem 0 0.4375rem;text-align:center;flex:1;transition:transform .05s}
-.ok{background:#1b4a3d;color:#8ef0cc;box-shadow:0 0.25rem 0 #0a271e}
-.ok.on{background:var(--teal);color:#012;box-shadow:0 0.25rem 0 var(--teal-d),0 0 0.875rem #20d6c766}
-.ko{background:#4a1d26;color:#ffb0bb;box-shadow:0 0.25rem 0 #29090f}
-.ko.on{background:var(--red);color:#fff;box-shadow:0 0.25rem 0 var(--red-d),0 0 0.875rem #ff3b4e66}
-.st{flex:none;width:3.375rem;background:#3c3012;color:var(--gold);box-shadow:0 0.25rem 0 #1d1707}
-.st.has{background:var(--gold);color:#000;box-shadow:0 0.25rem 0 var(--gold-d)}
-.ok:active,.ko:active,.st:active{transform:translateY(0.1875rem);box-shadow:0 0.0625rem 0 #0008}
-.tricks{display:flex;flex-direction:column;gap:0.375rem}
-.tricks .lbl{font-size:0.8125rem;color:var(--mut);text-align:center;letter-spacing:0.0625rem}
-.tk{display:flex;flex-wrap:wrap;gap:0.375rem;justify-content:center}
-.tk button{font-family:var(--arcade);font-size:1.25rem;min-width:2.75rem;padding:0.5625rem 0 0.3125rem;border-radius:0.6875rem;background:var(--key);box-shadow:0 0.25rem 0 var(--key-d)}
-.tk button.on{background:var(--red);color:#fff;box-shadow:0 0.25rem 0 var(--red-d)}
+.row.won{background:linear-gradient(90deg,#20d6c724,#ffffff0b)}
+.row.lost{background:linear-gradient(90deg,#ff3b4e24,#ffffff0b)}
+.bonusbtn{flex:none;width:2.25rem;height:2.25rem;border-radius:0.75rem;background:#3c3012;color:var(--gold);box-shadow:0 0.25rem 0 #1d1707;font-size:1.125rem;display:grid;place-items:center}
+.bonusbtn.has{background:var(--gold);color:#000;box-shadow:0 0.25rem 0 var(--gold-d)}
+.bonusbtn:active{transform:translateY(0.1875rem);box-shadow:none}
+.tkrow{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap}
+.bidlbl{flex:none;display:flex;flex-direction:column;align-items:center;gap:0.0625rem;background:#ffffff10;border-radius:0.75rem;padding:0.3125rem 0.625rem;font-size:0.75rem;color:var(--mut);font-weight:900;line-height:1}
+.bidlbl b{font-family:var(--arcade);color:var(--txt);font-size:1.375rem;font-weight:400;padding-top:0.125rem}
+.tk{display:flex;flex-wrap:wrap;gap:0.375rem;flex:1}
+.tk button{position:relative;font-family:var(--arcade);font-size:1.1875rem;width:2.625rem;height:2.625rem;padding:0;border-radius:0.6875rem;background:var(--key);box-shadow:0 0.25rem 0 var(--key-d);display:grid;place-items:center}
+.tk button.tgt::after{content:'';position:absolute;bottom:0.3125rem;width:0.375rem;height:0.375rem;border-radius:50%;background:var(--gold)}
+.tk button.on-ok{background:var(--teal);color:#012;box-shadow:0 0.25rem 0 var(--teal-d),0 0 0.875rem #20d6c766}
+.tk button.on-ko{background:var(--red);color:#fff;box-shadow:0 0.25rem 0 var(--red-d),0 0 0.875rem #ff3b4e66}
+.tk button.on-ok.tgt::after,.tk button.on-ko.tgt::after{background:#00000055}
 .tk button:active{transform:translateY(0.1875rem);box-shadow:none}
 .btags{display:flex;gap:0.3125rem;flex-wrap:wrap}
 .btags span{font-size:0.8125rem;font-weight:900;background:#ffc83d22;color:var(--gold);border-radius:0.5rem;padding:0.1875rem 0.4375rem}
@@ -282,7 +280,7 @@ function cls(v) { return v > 0 ? 'pos' : v < 0 ? 'neg' : 'nil'; }
 
 /* ---------- Calcul des points ---------- */
 function R(i) {
-  return S.rounds[i] || (S.rounds[i] = { bids: {}, tricks: {}, bonus: {}, cannon: {}, miss: {} });
+  return S.rounds[i] || (S.rounds[i] = { bids: {}, tricks: {}, bonus: {}, cannon: {} });
 }
 function bonusSum(b) {
   if (!b) return 0;
@@ -407,28 +405,24 @@ function vPlay() {
   var allSet = ps.every(function (p) { return r.tricks[p.id] != null; });
   var tsum = ps.reduce(function (t, p) { return t + (r.tricks[p.id] || 0); }, 0);
   var h = header(editing ? 'CORRIGER M' + n : 'MANCHE ' + n, gameLeft(), gameRight()) + '<main>' + (editing ? '' : dots(i)) +
-    '<div class="ttl"><small>' + n + ' CARTE' + (n > 1 ? 'S' : '') + ' · QUI A RÉUSSI ?</small></div>';
+    '<div class="ttl"><small>' + n + ' CARTE' + (n > 1 ? 'S' : '') + ' · PLIS REMPORTÉS</small></div>' +
+    '<div class="hint">Tape le nombre de plis réellement gagnés par chacun.</div>';
   ps.forEach(function (p) {
     var bid = r.bids[p.id], t = r.tricks[p.id];
-    var ok = t != null && t === bid, ko = !ok && (r.miss[p.id] || t != null);
+    var ok = t != null && t === bid, ko = t != null && !ok;
     var sc = roundScore(i, p.id);
     var bsum = bonusSum(r.bonus[p.id]);
-    h += '<div class="row" style="--c:' + p.color + '" data-row="' + p.id + '"><div class="rh">' + av(p) +
+    h += '<div class="row ' + (ok ? 'won' : ko ? 'lost' : '') + '" style="--c:' + p.color + '" data-row="' + p.id + '"><div class="rh">' + av(p) +
       '<span class="nm">' + esc(p.name) + '</span>' +
       (S.opts.rascal && r.cannon[p.id] ? '<span title="Boulet de canon">💣</span>' : '') +
-      '<button class="bid" data-act="editbid" data-id="' + p.id + '">pari <b>' + bid + '</b> ✎</button>' +
+      (S.opts.bonus ? '<button class="bonusbtn ' + (bsum ? 'has' : '') + '" data-act="bonus" data-id="' + p.id + '" aria-label="Bonus">⭐</button>' : '') +
       '<span class="pts ' + (sc == null ? 'nil' : cls(sc)) + '" data-pts="' + p.id + '">' + (sc == null ? '—' : fmt(sc)) + '</span></div>' +
-      '<div class="ra"><button class="ok ' + (ok ? 'on' : '') + '" data-act="ok" data-id="' + p.id + '">✔ Réussi</button>' +
-      '<button class="ko ' + (ko ? 'on' : '') + '" data-act="ko" data-id="' + p.id + '">✘ Raté</button>' +
-      (S.opts.bonus ? '<button class="st ' + (bsum ? 'has' : '') + '" data-act="bonus" data-id="' + p.id + '" aria-label="Bonus">⭐</button>' : '') + '</div>';
-    if (ko) {
-      h += '<div class="tricks"><div class="lbl">PLIS RÉELLEMENT GAGNÉS</div><div class="tk">';
-      for (var v = 0; v <= n; v++) {
-        if (v === bid) continue;
-        h += '<button class="' + (t === v ? 'on' : '') + '" data-act="tricks" data-id="' + p.id + '" data-v="' + v + '">' + v + '</button>';
-      }
-      h += '</div></div>';
+      '<div class="tkrow"><button class="bidlbl" data-act="editbid" data-id="' + p.id + '">Pari<b>' + bid + '</b></button><div class="tk">';
+    for (var v = 0; v <= n; v++) {
+      var vc = (v === bid ? 'tgt ' : '') + (t === v ? (v === bid ? 'on-ok' : 'on-ko') : '');
+      h += '<button class="' + vc + '" data-act="settricks" data-id="' + p.id + '" data-v="' + v + '">' + v + '</button>';
     }
+    h += '</div></div>';
     if (S.opts.bonus && bsum) {
       var lost = ko && !(S.opts.rascal && !r.cannon[p.id] && t != null && Math.abs(t - bid) === 1);
       h += '<div class="btags">' + BONUS.filter(function (x) { return (r.bonus[p.id] || {})[x.k]; }).map(function (x) {
@@ -750,20 +744,15 @@ var actions = {
   selbid: function (d) { ui.sel = d.id; render(); },
   cannon: function (d) { var r = R(curRound()); commit(function () { r.cannon[d.id] = !r.cannon[d.id]; }); buzz(); },
   toplay: function () { commit(function () { S.view = 'play'; }); },
-  ok: function (d) {
-    var r = R(curRound());
-    commit(function () { r.tricks[d.id] = r.bids[d.id]; delete r.miss[d.id]; ui.anim = { type: 'coins', sel: '[data-act="ok"][data-id="' + d.id + '"]', id: d.id }; });
-    buzz(12);
-  },
-  ko: function (d) {
-    var r = R(curRound());
-    commit(function () { r.miss[d.id] = true; if (r.tricks[d.id] === r.bids[d.id]) delete r.tricks[d.id]; ui.anim = { type: 'shake', id: d.id }; });
-    buzz([20, 40, 20]);
-  },
-  tricks: function (d) {
-    var r = R(curRound());
-    commit(function () { r.tricks[d.id] = +d.v; r.miss[d.id] = true; ui.anim = { type: 'pop', sel: '[data-pts="' + d.id + '"]' }; });
-    buzz();
+  settricks: function (d) {
+    var r = R(curRound()), v = +d.v, bid = r.bids[d.id];
+    commit(function () {
+      r.tricks[d.id] = v;
+      ui.anim = v === bid
+        ? { type: 'coins', sel: '[data-act="settricks"][data-id="' + d.id + '"][data-v="' + v + '"]', id: d.id }
+        : { type: 'shake', id: d.id };
+    });
+    buzz(v === bid ? 12 : [20, 40, 20]);
   },
   bonus: function (d) { ui.modal = { type: 'bonus', id: d.id }; render(); },
   bset: function (d) {
@@ -774,14 +763,7 @@ var actions = {
   editbid: function (d) { ui.modal = { type: 'pick', id: d.id }; render(); },
   pickbid: function (d) {
     var r = R(curRound());
-    commit(function () {
-      var was = r.bids[d.id], v = +d.v;
-      // Un « réussi » suit le nouveau pari ; des plis saisis restent tels quels.
-      if (r.tricks[d.id] === was && !r.miss[d.id]) r.tricks[d.id] = v;
-      else if (r.tricks[d.id] === v) delete r.miss[d.id];
-      r.bids[d.id] = v;
-      ui.modal = null;
-    });
+    commit(function () { r.bids[d.id] = +d.v; ui.modal = null; });
   },
   validate: function () {
     var r = R(curRound());
