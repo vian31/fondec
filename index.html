@@ -88,8 +88,9 @@ footer{padding:0.625rem 0.875rem calc(0.875rem + env(safe-area-inset-bottom));di
 .dots i,.dots button{width:1.875rem;height:1.875rem;border-radius:0.625rem;background:#ffffff12;font-style:normal;font-family:Nunito,sans-serif;font-size:0.9375rem;font-weight:900;display:grid;place-items:center;color:var(--mut);transition:transform .05s}
 .dots button.d{cursor:pointer;box-shadow:0 0.125rem 0 #0b2a20}
 .dots button.d:active{transform:translateY(0.0625rem) scale(.94);box-shadow:none}
-.dots i.d{background:var(--teal-d);color:#fff}
-.dots i.c{background:var(--gold);color:#000;transform:scale(1.18);box-shadow:0 0 0.75rem var(--gold)}
+.dots i.d,.dots button.d{background:var(--teal-d);color:#fff}
+.dots i.c,.dots button.c{background:var(--gold);color:#000;transform:scale(1.18);box-shadow:0 0 0.75rem var(--gold)}
+.dots button.c:active{transform:translateY(0.0625rem) scale(1.1);box-shadow:none}
 
 /* Annonces */
 .who{display:flex;align-items:center;gap:0.75rem;justify-content:center;margin-top:0.25rem}
@@ -215,19 +216,25 @@ tr.sumrow td{font-family:var(--arcade);font-size:1rem;font-weight:400;color:var(
 .empty{text-align:center;color:var(--mut);padding:1.875rem 0.625rem;font-size:0.9375rem;line-height:1.6}
 .empty .big{font-size:3.5rem;display:block;filter:drop-shadow(0 0 0.875rem #ffc83d55)}
 
-/* Écran de démarrage */
+/* Écran de démarrage : reste figé tant que la page n'est pas vraiment prête (classe .go
+   ajoutée par le script une fois les polices et ressources chargées), pour ne jamais se
+   jouer caché derrière l'écran de lancement natif de l'appli installée. */
 #boot{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.75rem;
   background:radial-gradient(120% 60% at 50% 0,#1d4466 0,var(--sea) 30%,var(--ink) 65%,var(--deep));
   transition:opacity .4s ease,transform .4s ease}
 #boot.out{opacity:0;transform:scale(1.06)}
 .bootfx{position:absolute;inset:0;overflow:hidden}
-.bootfx span{position:absolute;bottom:-2rem;font-size:1.25rem;opacity:0;animation:bootfloat 2.4s ease-in forwards}
-.bootlogo{width:6.5rem;height:6.5rem;border-radius:1.5rem;box-shadow:0 0.75rem 2rem #000a,0 0 2.5rem #ffc83d55;
-  animation:bootpop .7s cubic-bezier(.17,.89,.32,1.49) both}
+.bootfx span{position:absolute;bottom:-2rem;font-size:1.25rem;opacity:0}
+#boot.go .bootfx span{animation:bootfloat 2.4s ease-in forwards}
+.bootlogo{width:6.5rem;height:6.5rem;border-radius:1.5rem;display:block;box-shadow:0 0.75rem 2rem #000a,0 0 2.5rem #ffc83d55;
+  opacity:0;transform:scale(.3) rotate(-18deg)}
+#boot.go .bootlogo{animation:bootpop .7s cubic-bezier(.17,.89,.32,1.49) both}
 .boottitle{font-family:var(--arcade);font-size:2.125rem;color:var(--gold);text-shadow:0 0.2rem 0 var(--red-d),0 0.4rem 1rem #000;
-  letter-spacing:.0625rem;opacity:0;animation:bootup .5s ease .35s both}
+  letter-spacing:.0625rem;opacity:0;transform:translateY(.6rem)}
+#boot.go .boottitle{animation:bootup .5s ease .35s both}
 .boottag{font-weight:900;font-size:0.9375rem;letter-spacing:.2rem;color:var(--teal);text-transform:uppercase;
-  opacity:0;animation:bootup .5s ease .6s both}
+  opacity:0;transform:translateY(.6rem)}
+#boot.go .boottag{animation:bootup .5s ease .6s both}
 @keyframes bootpop{0%{transform:scale(.3) rotate(-18deg);opacity:0}60%{transform:scale(1.08) rotate(4deg);opacity:1}100%{transform:scale(1) rotate(0)}}
 @keyframes bootup{from{opacity:0;transform:translateY(.6rem)}to{opacity:1;transform:none}}
 @keyframes bootfloat{0%{opacity:0;transform:translateY(0) rotate(0)}15%{opacity:.85}100%{opacity:0;transform:translateY(-32rem) rotate(50deg)}}
@@ -237,7 +244,17 @@ tr.sumrow td{font-family:var(--arcade);font-size:1rem;font-weight:400;color:var(
 <body>
 <div id="boot" aria-hidden="true">
   <div class="bootfx"></div>
-  <img class="bootlogo" src="icons/icon-512.png" alt="">
+  <svg class="bootlogo" viewBox="0 0 512 512" aria-hidden="true">
+    <defs><radialGradient id="bootg" cx="50%" cy="30%" r="75%"><stop offset="0" stop-color="#1d4466"/><stop offset=".6" stop-color="#0d1b2a"/><stop offset="1" stop-color="#081320"/></radialGradient></defs>
+    <rect width="512" height="512" rx="112" fill="url(#bootg)"/>
+    <g stroke="#a3122a" stroke-width="40" stroke-linecap="round"><line x1="110" y1="360" x2="402" y2="440"/><line x1="402" y1="360" x2="110" y2="440"/></g>
+    <g stroke="#ff3b4e" stroke-width="30" stroke-linecap="round"><line x1="110" y1="352" x2="402" y2="432"/><line x1="402" y1="352" x2="110" y2="432"/></g>
+    <path d="M256 92c-88 0-150 58-150 140 0 46 20 80 52 102v42c0 14 11 24 24 24h148c13 0 24-10 24-24v-42c32-22 52-56 52-102 0-82-62-140-150-140z" fill="#c48a00"/>
+    <path d="M256 84c-88 0-150 58-150 140 0 46 20 80 52 102v42c0 14 11 24 24 24h148c13 0 24-10 24-24v-42c32-22 52-56 52-102 0-82-62-140-150-140z" fill="#ffc83d"/>
+    <ellipse cx="200" cy="236" rx="40" ry="44" fill="#0d1b2a"/><ellipse cx="312" cy="236" rx="40" ry="44" fill="#0d1b2a"/>
+    <path d="M256 284l-24 40h48z" fill="#0d1b2a"/>
+    <g fill="#0d1b2a"><rect x="206" y="356" width="16" height="36" rx="6"/><rect x="248" y="356" width="16" height="36" rx="6"/><rect x="290" y="356" width="16" height="36" rx="6"/></g>
+  </svg>
   <div class="boottitle">☠ SKULL KING</div>
   <div class="boottag">Compteur de points</div>
 </div>
@@ -358,10 +375,10 @@ function gameRight() { return '<button class="ico" data-act="board" aria-label="
 function dots(cur) {
   var h = '<div class="dots">';
   for (var i = 0; i < ROUNDS; i++) {
-    var done = i < S.done && i !== cur;
-    h += done
-      ? '<button class="d" data-act="editround" data-v="' + i + '" aria-label="Corriger la manche ' + (i + 1) + '">' + (i + 1) + '</button>'
-      : '<i class="' + (i === cur ? 'c' : '') + '">' + (i + 1) + '</i>';
+    var gold = i === cur, clickable = i < S.done, cls = (clickable ? 'd' : '') + (gold ? ' c' : '');
+    h += clickable
+      ? '<button class="' + cls.trim() + '" data-act="editround" data-v="' + i + '" aria-label="Corriger la manche ' + (i + 1) + '">' + (i + 1) + '</button>'
+      : '<i class="' + cls.trim() + '">' + (i + 1) + '</i>';
   }
   return h + '</div>';
 }
@@ -497,7 +514,7 @@ function board(upto) {
 
 function vScores() {
   var d = S.done;
-  return header('MANCHE ' + d + ' ✔', gameLeft(), gameRight()) + '<main>' + dots(-1) + '<div class="ttl"><small>LE CLASSEMENT</small></div>' + board(d) +
+  return header('MANCHE ' + d + ' ✔', gameLeft(), gameRight()) + '<main>' + dots(d - 1) + '<div class="ttl"><small>LE CLASSEMENT</small></div>' + board(d) +
     '</main><footer><button class="btn red" data-act="next">▶ Manche ' + (d + 1) + ' · ' + (d + 1) + ' carte' + (d ? 's' : '') + '</button></footer>';
 }
 
@@ -849,31 +866,47 @@ document.addEventListener('pointerdown', wake, { once: true });
 render();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
 
-/* Petite animation de démarrage : logo, titre, quelques pièces qui flottent, puis disparaît. */
+/* Petite animation de démarrage : logo, titre, quelques pièces qui flottent, puis disparaît.
+   On attend que la page soit vraiment prête (polices + chargement complet, avec un plafond
+   de sécurité) avant de la lancer : sinon elle se joue en partie cachée derrière l'écran de
+   lancement natif de l'appli installée, et semble coupée quand celui-ci se retire. */
 (function boot() {
   var el = document.getElementById('boot');
   if (!el) return;
   var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!reduced) {
-    var fx = el.querySelector('.bootfx'), items = ['🪙', '🪙', '💀', '⚓', '🏴‍☠️'];
-    for (var i = 0; i < 7; i++) {
-      var s = document.createElement('span');
-      s.textContent = items[i % items.length];
-      s.style.left = (8 + Math.random() * 84) + '%';
-      s.style.animationDelay = (Math.random() * .7) + 's';
-      fx.appendChild(s);
+
+  function go() {
+    if (!el.parentNode) return;
+    if (!reduced) {
+      var fx = el.querySelector('.bootfx'), items = ['🪙', '🪙', '💀', '⚓', '🏴‍☠️'];
+      for (var i = 0; i < 7; i++) {
+        var s = document.createElement('span');
+        s.textContent = items[i % items.length];
+        s.style.left = (8 + Math.random() * 84) + '%';
+        s.style.animationDelay = (Math.random() * .7) + 's';
+        fx.appendChild(s);
+      }
     }
+    requestAnimationFrame(function () { el.classList.add('go'); });
+    var done = false;
+    function dismiss() {
+      if (done) return;
+      done = true;
+      el.classList.add('out');
+      el.addEventListener('transitionend', function () { el.remove(); }, { once: true });
+      setTimeout(function () { if (el.parentNode) el.remove(); }, 500);
+    }
+    el.addEventListener('click', dismiss);
+    setTimeout(dismiss, reduced ? 450 : 1650);
   }
-  var done = false;
-  function dismiss() {
-    if (done) return;
-    done = true;
-    el.classList.add('out');
-    el.addEventListener('transitionend', function () { el.remove(); }, { once: true });
-    setTimeout(function () { if (el.parentNode) el.remove(); }, 500);
-  }
-  el.addEventListener('click', dismiss);
-  setTimeout(dismiss, reduced ? 450 : 1650);
+
+  var pageReady = new Promise(function (res) {
+    if (document.readyState === 'complete') res();
+    else window.addEventListener('load', res, { once: true });
+  });
+  var fontsReady = (document.fonts && document.fonts.ready) || Promise.resolve();
+  var safetyNet = new Promise(function (res) { setTimeout(res, 1200); });
+  Promise.race([Promise.all([pageReady, fontsReady]), safetyNet]).then(go);
 })();
 </script>
 </body>
