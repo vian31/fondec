@@ -1,18 +1,17 @@
 {
-  "name": "Horizon artificiel",
-  "short_name": "Horizon",
-  "description": "Horizon artificiel plein écran qui réagit à l'inclinaison du téléphone posé à plat, écran vers le haut.",
+  "name": "Skull King · Compteur",
+  "short_name": "Skull King",
+  "description": "Compteur de points pour Skull King : annonces, plis, bonus et classement en direct.",
+  "lang": "fr",
   "start_url": "./index.html",
   "scope": "./",
-  "display": "fullscreen",
-  "display_override": ["fullscreen", "standalone"],
-  "orientation": "any",
-  "background_color": "#050507",
-  "theme_color": "#050507",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1b2a",
+  "theme_color": "#0d1b2a",
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
