@@ -82,6 +82,7 @@ footer{padding:0.625rem 0.875rem calc(0.875rem + env(safe-area-inset-bottom));di
 .recent button{background:#ffffff12;border-radius:1.25rem;padding:0.4375rem 0.8125rem;font-weight:900;font-size:0.875rem;box-shadow:0 0.1875rem 0 #0005}
 .recent button:active{transform:translateY(0.125rem);box-shadow:none}
 .opts-sum{display:flex;gap:0.375rem;justify-content:center;flex-wrap:wrap}
+.ver{text-align:center;color:var(--mut);opacity:.5;font-size:0.75rem;letter-spacing:0.0625rem}
 .tag{font-size:0.8125rem;font-weight:900;border-radius:0.625rem;padding:0.25rem 0.5625rem;background:#ffffff12;color:var(--mut)}
 .tag.on{background:#ffc83d26;color:var(--gold)}
 
@@ -267,6 +268,7 @@ tr.sumrow td{font-family:var(--arcade);font-size:1rem;font-weight:400;color:var(
 <script>
 'use strict';
 var ROUNDS = 10;
+var APP_VERSION = 'v12'; // à monter à chaque déploiement, pour vérifier qu'on a bien la dernière version
 var KEY = 'skullking-v1', RECENT = 'skullking-recent';
 var COLORS = ['#ff3b4e', '#20d6c7', '#ffc83d', '#9b5cff', '#ff8a1f', '#4da3ff', '#ff5fb8', '#7ee05a'];
 var EMOJIS = ['🦜', '🐙', '💀', '🧜', '🦈', '⚓', '🦑', '🐢', '🦀', '🐳', '🗡️', '🏴‍☠️', '🍺', '🦴', '🧭', '💎'];
@@ -395,6 +397,7 @@ function vSetup() {
     '<form class="add" data-form="add"' + (S.players.length >= 8 ? ' hidden' : '') + '><input id="pname" enterkeyhint="done" autocomplete="off" maxlength="14" placeholder="Nom du pirate…"><button class="btn" type="submit" aria-label="Ajouter">+</button></form>' +
     '<div id="recent">' + recentHtml() + '</div>' +
     '<div class="opts-sum"><span class="tag ' + (S.opts.bonus ? 'on' : '') + '">⭐ Bonus ' + (S.opts.bonus ? 'activés' : 'désactivés') + '</span><span class="tag ' + (S.opts.rascal ? 'on' : '') + '">🎯 Comptage ' + (S.opts.rascal ? 'Rascal' : 'classique') + '</span></div>' +
+    '<div class="ver">Skull King · ' + APP_VERSION + '</div>' +
     '</main><footer><button class="btn red" data-act="start"' + (can ? '' : ' disabled') + '>⚓ Lever l\'ancre !</button></footer>';
 }
 function setupList() {
@@ -610,7 +613,8 @@ function mSettings() {
       ? '<b>Rascal</b> · pari exact : <b>10 × cartes</b> + bonus · écart de 1 : <b>la moitié</b> · plus : <b>0</b>.<br><b>💣 Boulet</b> · exact : <b>15 × cartes</b> + bonus, sinon <b>0</b>.'
       : '<b>Pari réussi</b> : 20 pts par pli + bonus.<br><b>Pari raté</b> : −10 par pli d\'écart.<br><b>Pari 0</b> : ±10 × nombre de cartes.') + '</div>' +
     (inGame ? '<button class="btn dim sm" data-act="abandon">🏳 Abandonner la partie</button>' : '') +
-    '<button class="btn sm" data-act="close">OK</button>';
+    '<button class="btn sm" data-act="close">OK</button>' +
+    '<div class="ver">Skull King · ' + APP_VERSION + '</div>';
 }
 
 function render() {
