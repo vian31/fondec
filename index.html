@@ -486,7 +486,7 @@ function vPlay() {
   return h + '</main><footer><button class="btn" data-act="validate"' + (allSet && !over ? '' : ' disabled') + '>' + (editing ? '✔ Enregistrer la correction' : '✔ Valider la manche') + '</button></footer>';
 }
 
-function board(upto) {
+function board(upto, editable) {
   var rk = ranking(upto), prev = upto ? totals(upto - 1) : {};
   var max = Math.max.apply(null, rk.map(function (x) { return x.tot; }).concat([1]));
   var h = '<div style="display:flex;flex-direction:column;gap:0.375rem">';
@@ -502,19 +502,21 @@ function board(upto) {
   h += '<div class="tbl"><table><tr><th></th>' + S.players.map(function (p) { return '<th>' + p.emoji + '<span style="--c:' + p.color + '"></span></th>'; }).join('') + '</tr>';
   for (var i = 0; i < upto; i++) {
     var r = S.rounds[i];
-    h += '<tr class="edit" data-act="editround" data-v="' + i + '"><td>' + (i + 1) + '</td>' + S.players.map(function (p) {
+    h += '<tr' + (editable ? ' class="edit" data-act="editround" data-v="' + i + '"' : '') + '><td>' + (i + 1) + '</td>' + S.players.map(function (p) {
       var s = roundScore(i, p.id), b = bonusSum(r.bonus[p.id]);
       return '<td class="' + (s < 0 ? 'n' : '') + '">' + num(s || 0) + '<span class="s">' + r.tricks[p.id] + '/' + r.bids[p.id] + (S.opts.bonus && b ? '⭐' : '') + (S.opts.rascal && r.cannon[p.id] ? '💣' : '') + '</span></td>';
     }).join('') + '</tr>';
   }
   var t = totals(upto);
   h += '<tr class="sumrow"><td>Σ</td>' + S.players.map(function (p) { return '<td>' + num(t[p.id]) + '</td>'; }).join('') + '</tr></table></div>';
-  return h + '<div class="hint">Tape une manche pour la corriger. <span style="opacity:.7">(plis/pari)</span></div>';
+  return h + (editable
+    ? '<div class="hint">Tape une manche pour la corriger. <span style="opacity:.7">(plis/pari)</span></div>'
+    : '<div class="hint">Détail par manche <span style="opacity:.7">(plis/pari)</span></div>');
 }
 
 function vScores() {
   var d = S.done;
-  return header('MANCHE ' + d + ' ✔', gameLeft(), gameRight()) + '<main>' + dots(d - 1) + '<div class="ttl"><small>LE CLASSEMENT</small></div>' + board(d) +
+  return header('MANCHE ' + d + ' ✔', gameLeft(), gameRight()) + '<main>' + dots(d - 1) + '<div class="ttl"><small>LE CLASSEMENT</small></div>' + board(d, true) +
     '</main><footer><button class="btn red" data-act="next">▶ Manche ' + (d + 1) + ' · ' + (d + 1) + ' carte' + (d ? 's' : '') + '</button></footer>';
 }
 
@@ -559,7 +561,7 @@ function mPick(pid) {
   return h + '</div>';
 }
 function mBoard() {
-  return '<div class="sh"><div class="logo">🏆 SCORES</div><button class="ico" data-act="close">✕</button></div>' + board(S.done);
+  return '<div class="sh"><div class="logo">🏆 SCORES</div><button class="ico" data-act="close">✕</button></div>' + board(S.done, false);
 }
 function mRules() {
   var li = function (e, t) { return '<li><span>' + e + '</span><span>' + t + '</span></li>'; };
