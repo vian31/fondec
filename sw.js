@@ -1,5 +1,5 @@
 // Service worker : met l'app en cache pour fonctionner hors-ligne autour de la table.
-var CACHE_NAME = 'skullking-v14';
+var CACHE_NAME = 'skullking-v15';
 var ASSETS = [
   './',
   './index.html',
@@ -29,10 +29,12 @@ self.addEventListener('activate', function (event) {
 });
 
 // Réseau d'abord pour récupérer les mises à jour, cache en secours hors-ligne.
+// cache:'no-store' force à ignorer le cache HTTP du navigateur : sans ça, une réponse
+// encore "fraîche" selon ses en-têtes peut masquer une mise à jour déjà en ligne.
 self.addEventListener('fetch', function (event) {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    fetch(event.request).then(function (res) {
+    fetch(event.request, { cache: 'no-store' }).then(function (res) {
       if (res.ok && new URL(event.request.url).origin === location.origin) {
         var copy = res.clone();
         caches.open(CACHE_NAME).then(function (cache) { cache.put(event.request, copy); });
