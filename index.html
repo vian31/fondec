@@ -136,6 +136,7 @@ footer{padding:0.625rem 0.875rem calc(0.875rem + env(safe-area-inset-bottom));di
 .btags span{font-size:0.8125rem;font-weight:900;background:#ffc83d22;color:var(--gold);border-radius:0.5rem;padding:0.1875rem 0.4375rem}
 .btags span.off{background:#ffffff10;color:var(--mut);text-decoration:line-through}
 .warn{text-align:center;font-size:0.875rem;color:var(--gold);font-weight:900}
+.warn.bad{color:var(--red)}
 
 /* Classement */
 .rank{display:flex;align-items:center;gap:0.625rem;padding:0.5rem 0.625rem;border-radius:0.875rem;background:#ffffff0b;position:relative}
@@ -432,8 +433,9 @@ function vPlay() {
     }
     h += '</div>';
   });
-  if (allSet && tsum !== n) h += '<div class="warn">⚠ ' + tsum + ' pli' + (tsum > 1 ? 's' : '') + ' saisi' + (tsum > 1 ? 's' : '') + ' pour ' + n + ' carte' + (n > 1 ? 's' : '') + (tsum === n - 1 ? ' — le Kraken est passé ?' : '') + '</div>';
-  return h + '</main><footer><button class="btn" data-act="validate"' + (allSet ? '' : ' disabled') + '>' + (editing ? '✔ Enregistrer la correction' : '✔ Valider la manche') + '</button></footer>';
+  var over = tsum > n;
+  if (allSet && tsum !== n) h += '<div class="warn' + (over ? ' bad' : '') + '">⚠ ' + tsum + ' pli' + (tsum > 1 ? 's' : '') + ' saisi' + (tsum > 1 ? 's' : '') + ' pour ' + n + ' carte' + (n > 1 ? 's' : '') + (over ? ' — impossible, vérifie les saisies' : tsum === n - 1 ? ' — le Kraken est passé ?' : '') + '</div>';
+  return h + '</main><footer><button class="btn" data-act="validate"' + (allSet && !over ? '' : ' disabled') + '>' + (editing ? '✔ Enregistrer la correction' : '✔ Valider la manche') + '</button></footer>';
 }
 
 function board(upto) {
@@ -766,8 +768,10 @@ var actions = {
     commit(function () { r.bids[d.id] = +d.v; ui.modal = null; });
   },
   validate: function () {
-    var r = R(curRound());
+    var r = R(curRound()), n = curRound() + 1;
     if (!S.players.every(function (p) { return r.tricks[p.id] != null; })) return;
+    var tsum = S.players.reduce(function (t, p) { return t + (r.tricks[p.id] || 0); }, 0);
+    if (tsum > n) return;
     commit(function () {
       if (S.edit) { S.view = S.edit.back; S.edit = null; return; }
       S.done++;
